@@ -10,7 +10,9 @@ export function baseOptions(): BaseLayoutProps {
           <span>PayWay SDK</span>
         </span>
       ),
+      enableSearch: false,
     },
+    disableThemeSwitch: true,
     githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
   };
 }

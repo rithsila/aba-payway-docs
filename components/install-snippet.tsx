@@ -2,9 +2,14 @@
 
 import { useState } from 'react';
 
-type TabKey = 'pnpm' | 'npm' | 'bun' | 'yarn' | 'ai';
+type TabKey = 'ai' | 'pnpm' | 'npm' | 'bun' | 'yarn';
 
 const COMMANDS: Record<TabKey, { label: string; text: string; hint: string }> = {
+  ai: {
+    label: 'For LLM agent',
+    text: 'Integrate aba-payway-sdk-unofficial into this project following: https://raw.githubusercontent.com/rithsila/aba-payway-unofficial/main/docs/agent-guide.md',
+    hint: 'Cursor / Claude / Copilot',
+  },
   pnpm: {
     label: 'pnpm',
     text: 'pnpm add aba-payway-sdk-unofficial',
@@ -25,15 +30,10 @@ const COMMANDS: Record<TabKey, { label: string; text: string; hint: string }> = 
     text: 'yarn add aba-payway-sdk-unofficial',
     hint: 'Classic Yarn',
   },
-  ai: {
-    label: 'AI Prompt',
-    text: 'Integrate aba-payway-sdk-unofficial into this project following: https://raw.githubusercontent.com/rithsila/aba-payway-unofficial/main/docs/agent-guide.md',
-    hint: 'Cursor / Claude / Copilot',
-  },
 };
 
 export function InstallSnippet() {
-  const [activeTab, setActiveTab] = useState<TabKey>('pnpm');
+  const [activeTab, setActiveTab] = useState<TabKey>('ai');
   const [copied, setCopied] = useState(false);
 
   const current = COMMANDS[activeTab];

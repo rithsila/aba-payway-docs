@@ -110,3 +110,28 @@ input:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Interactive Preview side-by-side layout fix */
+.interactive-preview-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .interactive-preview-grid {
+    flex-direction: row !important;
+  }
+  .interactive-preview-code {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+  }
+  .interactive-preview-card {
+    width: 320px !important;
+    max-width: 320px !important;
+    flex-shrink: 0 !important;
+  }
+}
+
