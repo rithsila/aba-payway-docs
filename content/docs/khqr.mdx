@@ -13,11 +13,24 @@ const svgDataUri = await generateKHQR({
   amount: 25.00,
   currency: "USD",
   merchantName: "My Shop Cambodia",
-  headerColor: "#e63946", // Custom header banner color
+  headerColor: "#0057b8", // Custom header banner color — defaults to official KHQR red
 });
 
 // Returns: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0..."
 ```
+
+This is what the card looks like — a red header (matching the official KHQR
+branding, including its diagonal "flag tail" corner), the amount, a
+"Scan • Pay • Done" tagline, and a viewfinder-style corner frame around the
+QR itself:
+
+<img
+  src="/khqr-sample.png"
+  alt="Sample generateKHQR card: red header with merchant name and KHQR Payment subtitle, amount, Scan Pay Done tagline, and a QR code framed by corner brackets"
+  width={400}
+  height={540}
+  className="mx-auto max-w-[280px] rounded-xl shadow-lg"
+/>
 
 ---
 
@@ -51,5 +64,5 @@ You can pass the returned Data URI directly to any standard `<img>` tag:
 | `amount` | `number` | Yes | Amount shown on the QR card. |
 | `currency` | `"USD" \| "KHR"` | Yes | Currency code. |
 | `merchantName` | `string` | Yes | Merchant name displayed in card header. |
-| `headerColor` | `string` | No | Header hex/CSS color (default: `#e63946`). |
+| `headerColor` | `string` | No | Header hex/CSS color (default: `#bc271a`, the official KHQR red). |
 

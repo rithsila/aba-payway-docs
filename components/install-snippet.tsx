@@ -4,7 +4,8 @@ import { useState } from 'react';
 
 export function InstallSnippet() {
   const [copied, setCopied] = useState(false);
-  const command = 'npm install aba-payway-sdk-unofficial';
+  const command =
+    'Integrate aba-payway-sdk-unofficial into this project by following the instructions here: https://raw.githubusercontent.com/rithsila/aba-payway-unofficial/main/docs/agent-guide.md';
 
   const handleCopy = async () => {
     try {
@@ -20,7 +21,7 @@ export function InstallSnippet() {
     <div
       style={{
         width: '100%',
-        maxWidth: '520px',
+        maxWidth: '640px',
         margin: '0 auto 56px auto',
         backgroundColor: 'rgba(15, 23, 42, 0.75)',
         backdropFilter: 'blur(12px)',
@@ -53,21 +54,23 @@ export function InstallSnippet() {
           gap: '12px',
         }}
       >
-        <code
-          style={{
-            fontFamily: 'monospace',
-            fontSize: '15px',
-            color: '#38bdf8',
-            userSelect: 'all',
-            overflowX: 'auto',
-          }}
-        >
-          {command}
-        </code>
+        <div style={{ overflowX: 'auto', flex: 1, minWidth: 0 }}>
+          <code
+            style={{
+              fontFamily: 'monospace',
+              fontSize: '14px',
+              color: '#38bdf8',
+              userSelect: 'all',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {command}
+          </code>
+        </div>
         <button
           onClick={handleCopy}
           type="button"
-          aria-label="Copy install command"
+          aria-label="Copy agent prompt"
           style={{
             background: copied ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.08)',
             border: copied ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid rgba(255, 255, 255, 0.15)',
@@ -80,6 +83,7 @@ export function InstallSnippet() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
+            flexShrink: 0,
             transition: 'all 0.2s ease',
           }}
         >
