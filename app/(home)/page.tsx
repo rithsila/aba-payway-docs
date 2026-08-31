@@ -45,39 +45,6 @@ function AmbientFintechBackground() {
   );
 }
 
-function KhqrLogo() {
-  return (
-    <div
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '9px',
-        background: 'linear-gradient(135deg, #E12328 0%, #B81318 100%)',
-        color: '#FFFFFF',
-        padding: '7px 15px',
-        borderRadius: '10px',
-        boxShadow: '0 4px 16px rgba(225, 35, 40, 0.35)',
-        border: '1px solid rgba(255, 255, 255, 0.25)',
-        fontWeight: 800,
-        fontSize: '13px',
-        letterSpacing: '0.04em',
-      }}
-    >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <rect x="2" y="2" width="8" height="8" rx="2" stroke="white" strokeWidth="2" fill="none" />
-        <rect x="4.5" y="4.5" width="3" height="3" fill="white" />
-        <rect x="14" y="2" width="8" height="8" rx="2" stroke="white" strokeWidth="2" fill="none" />
-        <rect x="16.5" y="4.5" width="3" height="3" fill="white" />
-        <rect x="2" y="14" width="8" height="8" rx="2" stroke="white" strokeWidth="2" fill="none" />
-        <rect x="4.5" y="16.5" width="3" height="3" fill="white" />
-        <path d="M15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z" fill="white" />
-      </svg>
-      <span>KHQR</span>
-      <span style={{ fontSize: '10px', opacity: 0.9, fontWeight: 600 }}>BAKONG</span>
-    </div>
-  );
-}
-
 function AbaPaywayLogo() {
   return (
     <div
@@ -133,9 +100,6 @@ export default function HomePage() {
         >
           <div className="badge-float">
             <AbaPaywayLogo />
-          </div>
-          <div className="badge-float" style={{ animationDelay: '-2s' }}>
-            <KhqrLogo />
           </div>
 
           {/* Unofficial Pill Badge */}

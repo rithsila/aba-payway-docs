@@ -5,7 +5,7 @@ import { ClipboardPolyfill } from '@/components/clipboard-polyfill';
 
 export const metadata = {
   title: 'ABA PayWay SDK (Unofficial) — Documentation',
-  description: 'Unofficial TypeScript SDK for ABA PayWay payment gateway in Cambodia. KHQR, purchases, and webhooks.',
+  description: 'TypeScript SDK for ABA PayWay payment gateway in Cambodia.',
 };
 
 export default function Layout({ children }: { children: ReactNode }) {

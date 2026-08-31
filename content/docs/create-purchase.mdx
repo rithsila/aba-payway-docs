@@ -45,7 +45,9 @@ interface PurchaseResponse {
   readonly success: boolean;
   readonly transactionId: string;
   readonly checkoutUrl?: string;     // Web checkout redirect URL
-  readonly abapayDeeplink?: string;  // ABA mobile app deeplink
+  readonly abapayDeeplink?: string;  // Opens ABA Mobile on this payment
+  readonly appStoreUrl?: string;     // Fallback: no ABA Mobile installed (iOS)
+  readonly playStoreUrl?: string;    // Fallback: no ABA Mobile installed (Android)
   readonly qrString?: string;        // Raw EMV QR string for KHQR
   readonly qrImage?: string;         // Ready-to-render QR, as a PNG data URI
   readonly amount: number;
@@ -65,4 +67,33 @@ instead. See [KHQR Generation](/docs/khqr) for how to display it.
 `qrImage` is a PNG that ABA renders for you — you can put it straight in an
 `<img src>` with no extra work. Use [`generateKHQR`](/docs/khqr) only if you
 want a styled card instead of ABA's plain QR image.
+
+---
+
+## Paying on a phone
+
+If your customer is already on a phone — a Telegram mini app, a mobile web
+checkout, a WebView — don't show them a QR code they'd need a second device to
+scan. Pass `paymentOption: "abapay_khqr_deeplink"` and ABA also returns
+`abapayDeeplink`, which opens ABA Mobile directly on the payment:
+
+```typescript
+const purchase = await aba.createPurchase({
+  transactionId: generateTransactionId(),
+  amount: 4.5,
+  currency: "USD",
+  items: "Order #9921",
+  paymentOption: "abapay_khqr_deeplink",
+  returnDeeplink: {
+    ios_scheme: "myapp://order/42",
+    android_scheme: "myapp://order/42",
+  },
+});
+
+window.location.href = purchase.abapayDeeplink!;
+```
+
+See [ABA App Deeplink](/docs/deeplink) for the full flow, including the
+fallbacks for a phone without ABA Mobile and why you must still verify the
+payment server-side.
 

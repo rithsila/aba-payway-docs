@@ -1,0 +1,150 @@
+---
+title: ABA App Deeplink
+description: Opening ABA Mobile directly from a phone, mini app, or WebView
+---
+
+When the customer is already on a phone, showing them a QR code is a dead end —
+they'd need a second device to scan it. Instead, ask ABA for a **deeplink**: a
+`abamobilebank://` URL that opens ABA Mobile straight onto the payment.
+
+This is the flow you want for a Telegram mini app, a mobile web checkout, a
+WebView, or a native app.
+
+<Callout title="Requires v1.2.0 or later" type="info">
+`returnDeeplink` encoding and the store-link fields landed in
+`aba-payway-sdk-unofficial@1.2.0`. Run `npm install aba-payway-sdk-unofficial@latest`
+if you're on an older version.
+</Callout>
+
+---
+
+## Creating a deeplink purchase
+
+There's no separate method — it's the same `createPurchase()` call with
+`paymentOption` set:
+
+```typescript
+const purchase = await aba.createPurchase({
+  transactionId: generateTransactionId(),
+  amount: 4.5,
+  currency: "USD",
+  items: [{ name: "Fried rice", quantity: 1, price: 4.5 }],
+  paymentOption: "abapay_khqr_deeplink",
+  // Where ABA Mobile hands the customer back once they've paid.
+  // Pass the object — the SDK base64-encodes it the way ABA expects.
+  returnDeeplink: {
+    ios_scheme: "myapp://order/42",
+    android_scheme: "myapp://order/42",
+  },
+});
+```
+
+---
+
+## One call covers every device
+
+The response carries **every variant of the same payment**, so branch on the
+device rather than making a second purchase:
+
+| Customer is on | Field to use |
+| :--- | :--- |
+| Phone **with** ABA Mobile | `purchase.abapayDeeplink` |
+| Phone **without** it | `purchase.playStoreUrl` / `purchase.appStoreUrl` |
+| Desktop | `purchase.qrImage`, or a styled card via [`generateKHQR`](/docs/khqr) |
+
+```typescript
+if (isMobile && purchase.abapayDeeplink) {
+  window.location.href = purchase.abapayDeeplink;
+} else {
+  showQrCode(purchase.qrImage);
+}
+```
+
+A real response looks like this:
+
+```text
+abapayDeeplink  abamobilebank://ababank.com?type=payway&qrcode=00020101021230510016…
+qrString        00020101021230510016abaakhppxxx@abaa0115…
+qrImage         data:image/png;base64,iVBORw0KGgo…
+playStoreUrl    https://play.google.com/store/apps/details?id=com.paygo24.ibank
+appStoreUrl     https://itunes.apple.com/al/app/aba-mobile-bank/id968860649?mt=8
+```
+
+---
+
+## Two rules that matter more than the wiring
+
+<Callout title="The customer coming back is NOT proof of payment" type="warn">
+Anyone can open your `returnDeeplink` URL — a customer who cancelled, or
+someone who simply typed it. Always confirm with a server-side
+[`checkStatus()`](/docs/check-status) before you mark an order as paid.
+Treat the return trip as a UI hint only, never as authorization.
+</Callout>
+
+**Save the transaction ID on your server when you create the purchase.** Once
+ABA Mobile takes over the screen, your page may be backgrounded or killed
+outright — this happens often in Telegram and other in-app browsers. If the
+transaction ID lived only in React state, it's gone, and you can no longer
+check whether the customer paid.
+
+---
+
+## `returnDeeplink` encoding
+
+ABA expects `return_deeplink` as **base64-encoded JSON**:
+
+```json
+{
+  "ios_scheme": "myapp://order/42",
+  "android_scheme": "myapp://order/42"
+}
+```
+
+The SDK handles this for you — pass the plain object. If you pass a string
+instead, it's sent through untouched, so code that encoded it by hand keeps
+working. The encoder is exported if you need it directly:
+
+```typescript
+import { encodeReturnDeeplinkForABA } from "aba-payway-sdk-unofficial";
+
+encodeReturnDeeplinkForABA({ ios_scheme: "myapp://paid" });
+// "eyJpb3Nfc2NoZW1lIjoibXlhcHA6Ly9wYWlkIn0="
+```
+
+<Callout title="Omitting it strands your customer" type="warn">
+Without `returnDeeplink`, the customer pays and is left sitting inside ABA
+Mobile with no way back to your app. It's optional to ABA, but you almost
+always want it.
+</Callout>
+
+---
+
+## Payment options
+
+`paymentOption` accepts these values. Omit it entirely and ABA shows every
+method your merchant profile has enabled.
+
+| Value | Use for |
+| :--- | :--- |
+| `abapay_khqr_deeplink` | KHQR **plus** the ABA Mobile deeplink — the flow on this page. |
+| `abapay_khqr` | KHQR payment via ABA PAY and KHQR member banks. |
+| `cards` | Card payment processing. |
+| `alipay` | Alipay wallet. |
+| `wechat` | WeChat wallet. |
+| `google_pay` | Google Pay wallet. |
+
+---
+
+## Known limitation: embedded WebViews
+
+Some embedded browsers block custom URL schemes like `abamobilebank://`, and
+the jump silently does nothing. **Always render the QR code and the store links
+as a visible fallback** rather than assuming the redirect worked — and test on
+both iOS and Android, since behaviour differs between them.
+
+---
+
+## Official ABA Documentation Reference
+
+- **ABA Purchase Endpoint API**: [https://developer.payway.com.kh/purchase-14530820e0](https://developer.payway.com.kh/purchase-14530820e0)
+- **ABA Mobile App Integration**: [https://developer.payway.com.kh/ecommerce-checkout-3158159f0](https://developer.payway.com.kh/ecommerce-checkout-3158159f0)

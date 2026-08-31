@@ -30,6 +30,8 @@ import {
   formatPhoneForABA,
   getQRExpiration,
   generateABAHash,
+  encodeItemsForABA,
+  encodeReturnDeeplinkForABA,
 } from "aba-payway-sdk-unofficial";
 ```
 
@@ -61,3 +63,48 @@ import {
 - **ABA Requirement**: Every API request must have a valid `hash` generated with your `apiKey`. If parameters are in the wrong order or missing, ABA responds with code `1: Wrong Hash`.
 - **Where in ABA Docs**: Under **Security & Hashing Sequence** for Standard Purchase API.
 - **Direct Official Link**: [ABA PayWay Ecommerce Checkout Specs](https://developer.payway.com.kh/ecommerce-checkout-3158159f0) & [API Endpoints Overview](https://developer.payway.com.kh/api-endpoints-984508m0)
+
+#### 6. `encodeItemsForABA(items)`
+- **What it does**: Base64-encodes a `PurchaseItem[]` as JSON. `createPurchase()` calls this for you when you pass an array — use it directly only if you're building a request by hand.
+- **ABA Requirement**: The `items` parameter must be a Base64-encoded JSON array.
+- **Where in ABA Docs**: Inside **Ecommerce Checkout > Purchase** under parameter `items`.
+- **Direct Official Link**: [ABA PayWay Purchase Endpoint](https://developer.payway.com.kh/purchase-14530820e0)
+
+#### 7. `encodeReturnDeeplinkForABA(deeplink)`
+- **What it does**: Base64-encodes `{ ios_scheme, android_scheme }` as JSON, so ABA Mobile knows how to return the customer to your app. `createPurchase()` calls this for you when you pass an object; a string is passed through untouched.
+- **ABA Requirement**: The `return_deeplink` parameter must be a Base64-encoded JSON object naming both platform schemes.
+- **Where in ABA Docs**: Inside **Ecommerce Checkout > Purchase** under optional parameter `return_deeplink`.
+- **Direct Official Link**: [ABA PayWay Purchase Endpoint](https://developer.payway.com.kh/purchase-14530820e0)
+- **See also**: [ABA App Deeplink](/docs/deeplink)
+
+---
+
+## Exported Types
+
+```typescript
+import type {
+  ABAConfig,
+  PurchaseItem,
+  PaymentOption,
+  ReturnDeeplink,
+  PurchaseRequest,
+  PurchaseResponse,
+  StatusResponse,
+  PaymentStatus,
+  KHQROptions,
+  HashParams,
+} from "aba-payway-sdk-unofficial";
+```
+
+| Type | Description |
+| :--- | :--- |
+| `ABAConfig` | Client configuration — `merchantId`, `apiKey`, `baseUrl`, `webhookSecret`. |
+| `PurchaseItem` | A single line item — `name`, `quantity`, `price`. |
+| `PaymentOption` | `"cards"`, `"abapay_khqr"`, `"abapay_khqr_deeplink"`, `"alipay"`, `"wechat"`, `"google_pay"`. Any string is still accepted. |
+| `ReturnDeeplink` | `{ ios_scheme?, android_scheme? }` — where ABA Mobile returns the customer. |
+| `PurchaseRequest` | Input for `createPurchase()`. |
+| `PurchaseResponse` | Result of `createPurchase()`. |
+| `StatusResponse` | Result of `checkStatus()`. |
+| `PaymentStatus` | `"PENDING"`, `"APPROVED"`, `"DECLINED"`, `"REFUNDED"`, `"ERROR"`. |
+| `KHQROptions` | Input for `generateKHQR()`. |
+| `HashParams` | Raw parameters for `generateABAHash()`. |

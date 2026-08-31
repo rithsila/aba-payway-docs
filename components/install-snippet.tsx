@@ -43,7 +43,7 @@ export function InstallSnippet() {
           marginBottom: '10px',
         }}
       >
-        <span>QUICK INSTALL</span>
+        <span>PASTE TO YOUR LLM AGENT</span>
         <span>TypeScript / Node / Edge</span>
       </div>
       <div
