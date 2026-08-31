@@ -79,7 +79,9 @@ const purchase = await aba.createPurchase({
 });
 
 if (purchase.success) {
-  console.log("PayWay Web Checkout:", purchase.checkoutUrl);
+  // ABA's current API mainly returns a KHQR code, not a checkout link —
+  // qrImage is ready to display as-is, no extra work needed.
+  console.log("QR image (show this):", purchase.qrImage);
   console.log("ABA Mobile App Deeplink:", purchase.abapayDeeplink);
   console.log("Raw EMV QR Data:", purchase.qrString);
 }

@@ -10,9 +10,8 @@ import { ABAPayWay, type ABAConfig } from "aba-payway-sdk-unofficial";
 
 const config: ABAConfig = {
   merchantId: "ec460802",
-  apiKey: "your_api_key_here",
+  apiKey: "your_public_key_here",
   baseUrl: "https://checkout-sandbox.payway.com.kh",
-  webhookSecret: "your_webhook_secret", // optional
 };
 
 const aba = new ABAPayWay(config);
@@ -22,12 +21,29 @@ const aba = new ABAPayWay(config);
 
 ## Configuration Properties
 
-| Option | Type | Required | Description | Official Reference |
-| :--- | :--- | :--- | :--- | :--- |
-| `merchantId` | `string` | Yes | Your assigned merchant ID from ABA Bank. | [ABA Ecommerce Checkout](https://developer.payway.com.kh/ecommerce-checkout-3158159f0) |
-| `apiKey` | `string` | Yes | Public/Private API key used for HMAC-SHA512 request signing. | [ABA Security & Hash](https://developer.payway.com.kh/purchase-14530820e0) |
-| `baseUrl` | `string` | Yes | Gateway base URL (Sandbox or Production). | [ABA API Endpoints](https://developer.payway.com.kh/api-endpoints-984508m0) |
-| `webhookSecret`| `string` | No | Secret used to verify incoming pushback notifications. | [ABA Pushback Notification](https://developer.payway.com.kh/ecommerce-checkout-3158159f0) |
+| Option | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `merchantId` | `string` | Yes | "Merchant Id" on your ABA credential sheet. |
+| `apiKey` | `string` | Yes | "Public Key" on your ABA credential sheet. This is a secret — it's the HMAC-SHA512 key used to sign every request, despite the name. |
+| `baseUrl` | `string` | Yes | "API Url" on your ABA credential sheet. You can paste the full URL ABA gave you, or just the origin — the SDK keeps only the origin either way. |
+| `webhookSecret`| `string` | No | Accepted, but not read by anything yet. See [Webhooks](/docs/webhooks) — it's an unfinished feature, not a working option. |
+
+---
+
+## Your ABA credential sheet, mapped
+
+ABA gives you five items when you register. Here's what each one is for:
+
+| On the sheet | Goes in | Used for |
+| :--- | :--- | :--- |
+| Merchant Id | `merchantId` | Every request. |
+| Public Key | `apiKey` | Signing every request (HMAC-SHA512). |
+| API Url | `baseUrl` | Which server to call (sandbox or production). |
+| RSA Public Key | *(not used)* | Payout/refund APIs, which ABA turns on per merchant on request. Not used by anything in this SDK. |
+| RSA Private Key | *(not used)* | Same as above. |
+
+If you don't see an "RSA Public/Private Key" pair on your sheet, that's
+fine too — you don't need them.
 
 ---
 

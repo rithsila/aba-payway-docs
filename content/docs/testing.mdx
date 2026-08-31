@@ -7,13 +7,13 @@ This SDK includes full integration tests against the live ABA PayWay Sandbox.
 
 ## Setup Environment File
 
-Create a `.env` file in the root repository directory:
+Create a `.env` file in the root repository directory with the values from
+your ABA credential sheet:
 
 ```bash
 ABA_MERCHANT_ID=your_sandbox_merchant_id
-ABA_API_KEY=your_sandbox_api_key
+ABA_API_KEY=your_sandbox_public_key
 ABA_BASE_URL=https://checkout-sandbox.payway.com.kh
-ABA_WEBHOOK_SECRET=your_sandbox_webhook_secret
 ```
 
 ---
@@ -28,15 +28,34 @@ ABA_WEBHOOK_SECRET=your_sandbox_webhook_secret
 
 ## Running Tests
 
-Run the mocked unit test suite:
+Just filled in `.env`? Check it works first, before running anything else:
+
+```bash
+npm run verify:credentials
+```
+
+This makes one real $1.00 sandbox purchase and one status check, then tells
+you plainly whether your credentials are good — and if not, which value is
+wrong (mismatched merchant/key pair, or an expired key).
+
+Run the mocked unit test suite (no network calls, checks the code's logic):
 
 ```bash
 npm test
 ```
 
-Run live sandbox integration tests:
+Run live sandbox integration tests (real calls to ABA's sandbox):
 
 ```bash
 npm run test:sandbox
 ```
+
+Want to actually **see** a real QR code, not just terminal output? Run:
+
+```bash
+npm run see:qr
+```
+
+This saves ABA's QR code as `qr-code.png` in the project folder, which you
+can open and look at.
 

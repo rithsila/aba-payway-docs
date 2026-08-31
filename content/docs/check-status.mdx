@@ -13,9 +13,17 @@ if (response.success) {
   console.log("Paid Amount:", response.amount);
   console.log("Payment Time:", response.paymentTime);
 } else {
-  console.error("Query failed:", response.error);
+  console.error(`Query failed (code ${response.errorCode}):`, response.error);
 }
 ```
+
+<Callout title="Good to know" type="info">
+Before a customer pays, `amount` is set but `currency` stays empty — ABA
+only fills that in once money has actually moved. A brand-new transaction
+can also briefly report "not found" (code `6`) for about a second right
+after you create it — this isn't a bug, ABA just needs a moment to make it
+queryable. Retry once or twice if you see this right after `createPurchase()`.
+</Callout>
 
 ---
 
@@ -29,13 +37,13 @@ if (response.success) {
 
 ## Possible Payment Statuses
 
+This is the complete list `response.status` can be — there are no others:
+
 | Status | Description |
 | :--- | :--- |
 | `APPROVED` | Payment completed successfully. |
 | `PENDING` | Awaiting customer action / payment. |
-| `PRE-AUTH` | Pre-authorized hold on funds. |
 | `DECLINED` | Payment declined by card issuer or bank. |
-| `CANCELLED` | Customer or merchant cancelled transaction. |
 | `REFUNDED` | Transaction was refunded. |
-| `ERROR` | Could not query status or API error occurred. |
+| `ERROR` | `response.success` is `false` — check `response.errorCode` and `response.error` for why (e.g. `6` = transaction not found, `21` = expired API key). |
 
