@@ -10,7 +10,7 @@ const withMDX = createMDX();
 const config = {
   reactStrictMode: true,
   outputFileTracingRoot: __dirname,
+  allowedDevOrigins: ['192.168.99.97', 'localhost', '127.0.0.1'],
 };
 
 export default withMDX(config);
-

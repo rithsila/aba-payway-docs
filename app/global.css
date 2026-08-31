@@ -1,9 +1,62 @@
-@import 'fumadocs-ui/style.css';
-@import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/preset.css';
+@import "tailwindcss";
+@import "fumadocs-ui/style.css";
+
+@theme {
+  --spacing-fd-container: 1200px;
+}
+
+:root {
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Light Theme Variables */
+  --color-fd-background: hsl(0, 0%, 98%);
+  --color-fd-foreground: hsl(0, 0%, 3.9%);
+  --color-fd-muted: hsl(0, 0%, 95%);
+  --color-fd-muted-foreground: hsl(0, 0%, 45.1%);
+  --color-fd-popover: hsl(0, 0%, 100%);
+  --color-fd-popover-foreground: hsl(0, 0%, 15.1%);
+  --color-fd-card: hsl(0, 0%, 100%);
+  --color-fd-card-foreground: hsl(0, 0%, 3.9%);
+  --color-fd-border: hsl(0, 0%, 89.8%);
+  --color-fd-primary: #005C8A;
+  --color-fd-primary-foreground: hsl(0, 0%, 98%);
+  --color-fd-secondary: hsl(0, 0%, 93.1%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 9%);
+  --color-fd-accent: hsl(0, 0%, 92%);
+  --color-fd-accent-foreground: hsl(0, 0%, 9%);
+  --color-fd-ring: hsl(0, 0%, 63.9%);
+}
+
+.dark {
+  /* Dark Theme Variables */
+  --color-fd-background: #070b12;
+  --color-fd-foreground: hsl(0, 0%, 92%);
+  --color-fd-muted: hsl(0, 0%, 12.9%);
+  --color-fd-muted-foreground: hsl(0, 0%, 60.9%);
+  --color-fd-popover: hsl(0, 0%, 9.8%);
+  --color-fd-popover-foreground: hsl(0, 0%, 88%);
+  --color-fd-card: hsl(0, 0%, 9.8%);
+  --color-fd-card-foreground: hsl(0, 0%, 98%);
+  --color-fd-border: hsl(0, 0%, 16%);
+  --color-fd-primary: #00B2E3;
+  --color-fd-primary-foreground: hsl(0, 0%, 9%);
+  --color-fd-secondary: hsl(0, 0%, 12.9%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 98%);
+  --color-fd-accent: hsl(0, 0%, 16.9%);
+  --color-fd-accent-foreground: hsl(0, 0%, 90%);
+  --color-fd-ring: hsl(0, 0%, 54.9%);
+}
+
+.dark #nd-sidebar {
+  --color-fd-muted: hsl(0, 0%, 14%);
+  --color-fd-secondary: hsl(0, 0%, 16%);
+  --color-fd-muted-foreground: hsl(0, 0%, 70%);
+}
 
 html {
   scrollbar-gutter: stable;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -11,116 +64,49 @@ body {
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-@keyframes clothWave {
-  0% {
-    transform: perspective(1000px) rotateX(4deg) rotateY(-2deg) scale(1);
-  }
-  50% {
-    transform: perspective(1000px) rotateX(-3deg) rotateY(3deg) scale(1.03);
-  }
-  100% {
-    transform: perspective(1000px) rotateX(4deg) rotateY(-2deg) scale(1);
-  }
+/* Tabular figures for numbers and stats */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
-@keyframes silkShimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+/* Fumadocs Navbar Centering Fix */
+#nd-nav {
+  position: fixed !important;
+  top: 0.5rem !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 auto !important;
+  transform: none !important;
+  translate: none !important;
+  width: calc(100% - 2rem) !important;
+  max-width: 1200px !important;
+  box-sizing: border-box !important;
+  z-index: 40 !important;
 }
 
-@keyframes pulseGlow {
-  0%, 100% {
-    opacity: 0.35;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.65;
-    transform: scale(1.1);
-  }
+#nd-nav nav {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
 }
 
-@keyframes floatBadge {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-.cloth-wave-anim {
-  animation: clothWave 8s ease-in-out infinite;
-  transform-origin: center center;
-}
-
-.silk-shimmer-anim {
-  animation: silkShimmer 6s ease-in-out infinite;
-}
-
-.glow-pulse-anim {
-  animation: pulseGlow 7s ease-in-out infinite;
-}
-
-.badge-float {
-  animation: floatBadge 4s ease-in-out infinite;
-}
-
-/* Hover & Focus Micro-interactions */
-.btn-primary {
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(0, 92, 138, 0.45);
-  background-color: #006da3;
-}
-
-.btn-primary:active {
-  transform: translateY(0px) scale(0.98);
-}
-
-.btn-secondary {
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, background-color 0.18s ease;
-}
-
-.btn-secondary:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.3);
-  background-color: var(--color-fd-accent);
-}
-
-.btn-secondary:active {
-  transform: translateY(0px) scale(0.98);
-}
-
-.trust-card {
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.trust-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(0, 178, 227, 0.35) !important;
-  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
+/* Accessibility: Focus rings */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid #00B2E3;
+  outline-offset: 2px;
 }
 
 /* Accessibility: Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .cloth-wave-anim,
-  .silk-shimmer-anim,
-  .glow-pulse-anim,
-  .badge-float,
-  .btn-primary,
-  .btn-secondary,
-  .trust-card {
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

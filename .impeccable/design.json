@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-31T23:05:45+07:00",
+  "title": "Design System: ABA PayWay SDK Documentation",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "ABA Royal Blue",
+        "canonical": "#005C8A",
+        "tonalRamp": ["#001C2B", "#003653", "#00507B", "#005C8A", "#007BB8", "#1E9BD9", "#6BC2EC", "#D1EDFA"]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Royal Blue Light",
+        "canonical": "#007BB8",
+        "tonalRamp": ["#002538", "#00476B", "#00679E", "#007BB8", "#1F9BD9", "#56B6E7", "#9CD5F2", "#E1F3FC"]
+      },
+      "accent-cyan": {
+        "role": "secondary",
+        "displayName": "PayWay Cyan",
+        "canonical": "#00B2E3",
+        "tonalRamp": ["#003847", "#006B87", "#009EC7", "#00B2E3", "#33C4EB", "#70D7F2", "#B3EBFA", "#E6F9FE"]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Obsidian Black Background",
+        "canonical": "#040911",
+        "tonalRamp": ["#020408", "#040911", "#091222", "#0E1D36", "#172E54", "#284A82", "#5579B7", "#B8C9E6"]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Midnight Glass Surface",
+        "canonical": "#0A121E",
+        "tonalRamp": ["#04070C", "#0A121E", "#132136", "#1F3556", "#2D4C7A", "#4770AE", "#7E9ECF", "#D0DEF0"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headline titles only"
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Major section headings"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card and demo titles"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Documentation and paragraph text"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Badges and tab labels"
+      }
+    },
+    "shadows": [
+      {
+        "name": "bezel-glow",
+        "value": "0 20px 40px -15px rgba(0, 54, 90, 0.35)",
+        "purpose": "Hover elevation on double-bezel cards"
+      },
+      {
+        "name": "btn-glow",
+        "value": "0 8px 24px -4px rgba(0, 92, 138, 0.5)",
+        "purpose": "Rest state glow on primary CTA button"
+      },
+      {
+        "name": "inner-rim",
+        "value": "inset 0 1px 1px rgba(255, 255, 255, 0.1)",
+        "purpose": "Top specular catch on card borders"
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-smooth",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Default easing for card transitions and button hover"
+      },
+      {
+        "name": "ease-spring",
+        "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "purpose": "Spring animation for micro-interactions"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action button with gradient and icon circle.",
+      "html": "<button class=\"ds-btn-primary\"><span>Read Documentation</span><span class=\"ds-btn-icon-circle\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"></line><polyline points=\"12 5 19 12 12 19\"></polyline></svg></span></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 12px; padding: 12px 24px; border-radius: 9999px; background: linear-gradient(135deg, #005C8A 0%, #007BB8 100%); color: #FFFFFF; font-weight: 700; font-size: 15px; border: none; cursor: pointer; box-shadow: 0 8px 24px -4px rgba(0, 92, 138, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.3); transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -4px rgba(0, 92, 138, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.4); } .ds-btn-icon-circle { width: 28px; height: 28px; border-radius: 9999px; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary frosted pill button with cyan hover border.",
+      "html": "<button class=\"ds-btn-secondary\"><span>GitHub</span></button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 9999px; background: rgba(255, 255, 255, 0.05); color: #F5F5F5; border: 1px solid rgba(255, 255, 255, 0.12); font-weight: 600; font-size: 15px; cursor: pointer; backdrop-filter: blur(10px); transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease; } .ds-btn-secondary:hover { transform: translateY(-2px); border-color: rgba(0, 178, 227, 0.4); background-color: rgba(255, 255, 255, 0.1); }"
+    },
+    {
+      "name": "Double-Bezel Card",
+      "kind": "card",
+      "refersTo": "card-bezel",
+      "description": "Two-layer hardware container with frosted glass and top specular rim.",
+      "html": "<div class=\"ds-bezel-card\"><div class=\"ds-bezel-card-inner\"><h3 class=\"ds-card-title\">Universal KHQR</h3><p class=\"ds-card-body\">Outputs standard EMVCo compliant KHQR payload strings and instant mobile deeplinks.</p></div></div>",
+      "css": ".ds-bezel-card { border-radius: 24px; padding: 1.5px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-bezel-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -15px rgba(0, 54, 90, 0.35); } .ds-bezel-card-inner { border-radius: 22.5px; background: rgba(10, 18, 30, 0.7); backdrop-filter: blur(16px); padding: 24px; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1); } .ds-card-title { color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0 0 8px 0; } .ds-card-body { color: #9CA3AF; font-size: 14px; line-height: 1.5; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The FinTech Cockpit",
+    "overview": "The design system projects security, cryptographic rigor, and frictionless speed. Built for Cambodian developers navigating real financial transactions, the interface pairs deep dark navy canvases with glowing Cambodian Royal Blue and vibrant Cyan highlights.",
+    "keyCharacteristics": [
+      "Deep obsidian backdrop (#040911) paired with frosted midnight panels (#0A121E)",
+      "Royal Blue (#005C8A) and PayWay Cyan (#00B2E3) brand accents",
+      "Double-bezel hardware styling with subtle light borders",
+      "Smooth spring and ease-out micro-interactions (var(--ease-smooth))",
+      "Tabular numbers and monospaced code blocks for financial accuracy"
+    ],
+    "rules": [
+      {
+        "name": "The Trust Anchor Rule",
+        "body": "Royal Blue and Cyan are reserved strictly for interactive affordances, brand anchors, and verified statuses.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Number Rule",
+        "body": "All monetary amounts, transaction IDs, and numeric metrics must render with .tabular-nums or monospace fonts.",
+        "section": "typography"
+      },
+      {
+        "name": "The Double-Bezel Rule",
+        "body": "Significant containers use a two-layer structure: an outer gradient border shell enclosing an inner frosted dark surface.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do wrap primary interactive modules in the double-bezel card structure (.bezel-card).",
+      "Do use font-mono and .tabular-nums for all transaction IDs, monetary figures, and hashes.",
+      "Do include focus rings with #00B2E3 outline on all interactive inputs and buttons.",
+      "Do respect user preferences with @media (prefers-reduced-motion: reduce)."
+    ],
+    "donts": [
+      "Don't use generic stark gray cards with flat solid borders.",
+      "Don't mix unstyled raw numbers into financial tables or QR codes.",
+      "Don't introduce competing accent colors outside established status tags.",
+      "Don't create sharp 90-degree square buttons; preserve pill and rounded geometry."
+    ]
+  }
+}
