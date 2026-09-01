@@ -224,7 +224,7 @@ export default function HomePage() {
         {/* ======================= FOOTER ======================= */}
         <footer className="w-full pt-10 pb-4 border-t border-neutral-200 dark:border-neutral-800/80 text-center text-xs text-neutral-500 dark:text-neutral-400">
           <div className="max-w-2xl mx-auto space-y-2">
-            <p>Open source under MIT License. Created by the developer community.</p>
+            <p>Open source under MIT License. Created by AI agent .</p>
             <p className="text-neutral-500 text-xs">
               Disclaimer: This is an unofficial community project and is not affiliated with, endorsed by, or sponsored by ABA Bank (Advanced Bank of Asia Ltd).
             </p>
