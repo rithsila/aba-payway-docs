@@ -2,14 +2,9 @@
 
 import { useState } from 'react';
 
-type TabKey = 'ai' | 'pnpm' | 'npm' | 'bun' | 'yarn';
+type TabKey = 'pnpm' | 'npm' | 'bun' | 'yarn';
 
 const COMMANDS: Record<TabKey, { label: string; text: string; hint: string }> = {
-  ai: {
-    label: 'For LLM agent',
-    text: 'Integrate aba-payway-sdk-unofficial into this project following: https://raw.githubusercontent.com/rithsila/aba-payway-unofficial/main/docs/agent-guide.md',
-    hint: 'Cursor / Claude / Copilot',
-  },
   pnpm: {
     label: 'pnpm',
     text: 'pnpm add aba-payway-sdk-unofficial',
@@ -33,7 +28,7 @@ const COMMANDS: Record<TabKey, { label: string; text: string; hint: string }> = 
 };
 
 export function InstallSnippet() {
-  const [activeTab, setActiveTab] = useState<TabKey>('ai');
+  const [activeTab, setActiveTab] = useState<TabKey>('pnpm');
   const [copied, setCopied] = useState(false);
 
   const current = COMMANDS[activeTab];
@@ -84,14 +79,8 @@ export function InstallSnippet() {
         {/* Code Line + Copy Button */}
         <div className="flex items-center justify-between gap-3 px-2 py-1">
           <div className="overflow-x-auto font-mono text-xs text-neutral-800 dark:text-neutral-200 min-w-0">
-            {activeTab === 'ai' ? (
-              <span className="text-[#005C8A] dark:text-cyan-300 select-all font-medium">{current.text}</span>
-            ) : (
-              <>
-                <span className="text-neutral-400 dark:text-neutral-500 mr-2 select-none font-bold">$</span>
-                <span className="text-[#005C8A] dark:text-cyan-300 select-all font-medium">{current.text}</span>
-              </>
-            )}
+            <span className="text-neutral-400 dark:text-neutral-500 mr-2 select-none font-bold">$</span>
+            <span className="text-[#005C8A] dark:text-cyan-300 select-all font-medium">{current.text}</span>
           </div>
 
           <button
