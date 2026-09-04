@@ -1,0 +1,102 @@
+---
+title: Going to Production
+description: Readiness checklist, sandbox vs production differences, ABA approvals, and cutover
+---
+
+Guidelines for taking your integration from the ABA PayWay sandbox to live production.
+
+---
+
+## 1. Readiness Checklist
+
+Status verified against ABA's live sandbox on **2026-09-04**.
+
+### Verified Working
+
+- **Credentials & Signing**: ABA accepts valid HMAC-SHA512 request signatures and rejects invalid ones.
+- **KHQR Purchase**: Returns valid EMVCo payload (`000201...`) and rendered PNG QR image.
+- **ABA Mobile Deeplink**: `abamobilebank://` link works with App Store and Play Store fallback links.
+- **Transaction Status**: `checkStatus()` returns accurate amounts and statuses.
+- **Error Handling**: Unknown transaction IDs return code `6` gracefully as structured data, not exceptions.
+- **Hosted Card Checkout**: `paymentGate: 0` renders a payable card checkout page.
+- **Pushback Signature Verification**: Implemented according to ABA's algorithm and unit-tested against an independent implementation.
+- **Real Payment Settlement**: Verified on 2026-09-04 (transaction `EAMTMGQPZRTGQN`, USD 1.00, Mastercard `*6777`, reported `APPROVED`).
+
+### Not Yet Verified (Verify Before Launch)
+
+- **Refused card behavior**: A refused card leaves the transaction `PENDING` and open for retry. Confirm your system does not mark orders `DECLINED`.
+- **Live pushback delivery**: Pushback verification is unit-tested, but live callbacks require an ABA-whitelisted public HTTPS domain.
+- **Pushback idempotency**: Confirm your webhook handler safely handles duplicate callbacks.
+
+### Known Gaps (Decide, Don't Discover)
+
+- **Refunds**: The `/payments/refund` endpoint returns 404 on default sandbox merchants. Request refund API access from ABA if your business requires automated refunds.
+- **3D Secure**: Real cards trigger 3DS OTP verification in production. Ensure your checkout experience tolerates this flow.
+- **KHR Currency**: KHR amounts must be whole integers of 100 or greater (error codes 46 and 47). Untested in sandbox.
+- **Alternative Wallets**: Alipay, WeChat Pay, and Google Pay are untested. Enable only methods you have tested.
+
+---
+
+## 2. Sandbox vs Production Differences
+
+| Feature | Sandbox | Production |
+| :--- | :--- | :--- |
+| **Base URL** | `https://checkout-sandbox.payway.com.kh` | `https://checkout.payway.com.kh` |
+| **Merchant ID & Key** | Sandbox credential sheet | **Separate production credential sheet** from ABA |
+| **Cards** | Test cards only | Real payment cards only (test cards rejected) |
+| **KHQR** | Cannot be scanned by real ABA Mobile app | Real scannable Bakong / ABA QR |
+| **Money** | Simulated / none | Real currency transfers |
+
+<Callout title="Do not mix credentials" type="warn">
+Never use sandbox credentials against the production URL. Sandbox and production use distinct key pairs. Mixing them causes <code>Wrong Hash.</code> (code 1).
+</Callout>
+
+### Day-One Behavior Check: `paymentGate: 0`
+
+On sandbox profiles where the QR Payment API is active, `paymentGate: 0` is necessary to reach card checkout. On day one of production, create one card purchase to verify whether your production profile returns a `checkoutUrl` with or without `paymentGate: 0`.
+
+---
+
+## 3. What to Request from ABA
+
+When contacting ABA for production activation:
+
+1. **Submit Evidence Report**: Run `npm run report:sandbox` and send the generated report (`reports/sandbox-report-*.md`). Submit only when the verdict is **READY**.
+2. **Merchant ID**: Provide your sandbox merchant ID.
+3. **Whitelist Callback Domain**: Send your production `return_url` domain and request whitelisting. Non-whitelisted domains are rejected with **code 81** (or code 6 on purchase).
+4. **Enable Payment Options**: Request activation for the payment options you tested (e.g. cards, KHQR).
+5. **Request Refund / Payout APIs**: If needed, ask ABA to enable refund capabilities for your merchant profile.
+
+---
+
+## 4. Cutover Procedure
+
+1. Obtain production credentials from ABA Bank.
+2. Set `ABA_BASE_URL`, `ABA_MERCHANT_ID`, and `ABA_API_KEY` in your production environment variables.
+3. Deploy your application.
+4. **Conduct a real smoke test**: Make one small real purchase using a live card.
+5. Verify the payment in the official ABA Merchant Portal.
+6. Verify your webhook received the callback and verified the signature.
+7. Issue a refund through the portal or API if refunds are enabled.
+
+---
+
+## 5. Post-Launch Operations
+
+- **Poll, don't only listen**: Treat pushback webhooks as fast notifications, but use `checkStatus()` as the source of truth. ABA permits up to 600 requests/sec on status checking.
+- **Never trust client-side returns**: Only settle orders after server-side verification with `verifyWebhook()` or `checkStatus()`.
+- **Remember: PENDING is not failure**: When cards are refused, transactions stay `PENDING` for customer retries. Only `APPROVED` means payment is complete.
+- **Watch for Code 21**: Indicates API key expiration. Contact ABA promptly for key renewal if observed.
+
+---
+
+## 6. Common Production Error Codes
+
+| Code | Meaning | Resolution |
+| :--- | :--- | :--- |
+| `1` / `5` | Wrong Hash | Merchant ID and API key do not match. |
+| `6` (Purchase) | Domain not whitelisted | Request callback domain whitelisting from ABA. |
+| `6` (Status) | Transaction not found | Normal for ~1 second after creation. Retry. |
+| `21` | End of API lifetime | API key has expired. Request renewal from ABA. |
+| `23` | Payment option not enabled | Request payment option enablement on merchant profile. |
+| `81` | Return URL not whitelisted | Request domain whitelisting from ABA. |

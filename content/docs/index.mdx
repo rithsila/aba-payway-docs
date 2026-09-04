@@ -18,6 +18,8 @@ Many online tutorials make ABA PayWay integration sound very complicated, and pe
 - **ABA Plugins Section**: [https://developer.payway.com.kh/plugins-3186291f0](https://developer.payway.com.kh/plugins-3186291f0)
 - **ABA Sandbox Registration (Free Test Account)**: [https://sandbox.payway.com.kh/register-sandbox/](https://sandbox.payway.com.kh/register-sandbox/)
 - **National Bank of Cambodia (Bakong API Docs)**: [https://api-bakong.nbc.gov.kh/document](https://api-bakong.nbc.gov.kh/document)
+- **ABA Test Cards Guide (`docs/ABA Test Cards.md`)**: [ABA Test Cards Guide](https://github.com/rithsila/aba-payway-unofficial/blob/main/docs/ABA%20Test%20Cards.md) — Comprehensive sandbox test cards (Mastercard, Visa 3DS, Declined), 3DS OTP behaviors, 180-second token timeouts, and hosted card checkout instructions (`paymentGate: 0`).
+- **Official ABA `llms.txt` (AI & LLM Docs)**: [https://developer.payway.com.kh/llms.txt](https://developer.payway.com.kh/llms.txt) (also saved in [`docs/ABA llms.md`](https://github.com/rithsila/aba-payway-unofficial/blob/main/docs/ABA%20llms.md)) — ABA's official machine-readable developer documentation index listing direct `.md` endpoint URLs for LLMs, AI agents, and automated tools.
 
 
 ---
@@ -52,13 +54,15 @@ pnpm add aba-payway-sdk-unofficial
 
 Using Claude Code, Cursor, Copilot, or another AI coding assistant? Paste this
 single line into your agent session — it points the agent at a guide covering
-stack detection, installation, environment variables, and the purchase, KHQR,
-and status-check endpoints, so it wires up ABA PayWay correctly on the first
-try:
+stack detection, hosted card checkout with `paymentGate: 0`, webhook signature
+verification, and status semantics (`PENDING` vs `DECLINED`), so it wires up ABA
+PayWay correctly on the first try:
 
-```
+```text
 Integrate aba-payway-sdk-unofficial into this project by following the instructions here: https://raw.githubusercontent.com/rithsila/aba-payway-unofficial/main/docs/agent-guide.md
 ```
+
+*(Click the copy icon in the corner of the code block above to copy the prompt with one click).*
 
 ---
 

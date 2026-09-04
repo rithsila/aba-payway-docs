@@ -1,0 +1,15 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "configuration",
+    "create-purchase",
+    "deeplink",
+    "check-status",
+    "webhooks",
+    "khqr",
+    "testing",
+    "going-to-production",
+    "api-reference"
+  ]
+}

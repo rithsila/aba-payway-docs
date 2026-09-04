@@ -17,13 +17,48 @@ if (response.success) {
 }
 ```
 
-<Callout title="Good to know" type="info">
-Before a customer pays, `amount` is set but `currency` stays empty — ABA
-only fills that in once money has actually moved. A brand-new transaction
-can also briefly report "not found" (code `6`) for about a second right
-after you create it — this isn't a bug, ABA just needs a moment to make it
-queryable. Retry once or twice if you see this right after `createPurchase()`.
+---
+
+<Callout title="Critical: Only APPROVED Means Paid" type="warn">
+<strong>A refused card NEVER produces a "DECLINED" status.</strong>
+
+When a card is refused, ABA displays error 57 with a "Try Again" button on the hosted checkout page and leaves the transaction <strong>open for retry</strong>. As a result, <code>checkStatus()</code> continues to return <code>PENDING</code>. Verified against ABA's live sandbox: a transaction refused with a declined test card remained <code>PENDING</code> minutes later.
+
+- **Never write** <code>if (status === "DECLINED") cancelOrder()</code> — it will not fire for a card refusal.
+- **Never cancel or expire an order** because an attempt failed in the user's browser; the customer may retry and succeed.
+- Only settle orders when status is <code>APPROVED</code>.
 </Callout>
+
+---
+
+## Possible Payment Statuses
+
+| Status | Meaning | What to do |
+| :--- | :--- | :--- |
+| `APPROVED` | Payment completed and settled. | Settle order and deliver goods. |
+| `PENDING` | Awaiting payment or open for retry. | Keep waiting / polling. Card refusals stay here. |
+| `DECLINED` | Terminal decline from bank. | Do not rely on this for card refusal. |
+| `REFUNDED` | Transaction refunded. | Update order state. |
+| `ERROR` | API query failed. | Check `errorCode` and retry. |
+
+---
+
+## Error Codes Are Per-Endpoint
+
+<Callout title="Do not use a single shared error table" type="info">
+ABA error codes are specific to each endpoint, not global across the API. For example:
+- **Code 6 on `checkStatus` (`check-transaction-2`)**: Means "Transaction not found".
+- **Code 6 on `createPurchase` (`purchase`)**: Means "Domain not whitelisted".
+</Callout>
+
+### `check-transaction-2` Status Codes
+
+| Code | Meaning | Note |
+| :--- | :--- | :--- |
+| `0` | Success | Transaction found and reported. |
+| `1` | Wrong Hash | Merchant ID and API key do not match. |
+| `6` | Transaction not found | **Normal for ~1 second after creation** before it becomes queryable. Retry after a short delay. |
+| `21` | End of API lifetime | API key expired. Must request renewal from ABA. |
 
 ---
 
@@ -32,18 +67,4 @@ queryable. Retry once or twice if you see this right after `createPurchase()`.
 - **ABA Check Transaction Endpoint**: [https://developer.payway.com.kh/check-transaction-14530826e0](https://developer.payway.com.kh/check-transaction-14530826e0)
 - **ABA Transaction Details Endpoint**: [https://developer.payway.com.kh/get-a-transaction-details-14530824e0](https://developer.payway.com.kh/get-a-transaction-details-14530824e0)
 - **ABA Transaction List Endpoint**: [https://developer.payway.com.kh/get-transaction-list-14530825e0](https://developer.payway.com.kh/get-transaction-list-14530825e0)
-
----
-
-## Possible Payment Statuses
-
-This is the complete list `response.status` can be — there are no others:
-
-| Status | Description |
-| :--- | :--- |
-| `APPROVED` | Payment completed successfully. |
-| `PENDING` | Awaiting customer action / payment. |
-| `DECLINED` | Payment declined by card issuer or bank. |
-| `REFUNDED` | Transaction was refunded. |
-| `ERROR` | `response.success` is `false` — check `response.errorCode` and `response.error` for why (e.g. `6` = transaction not found, `21` = expired API key). |
 

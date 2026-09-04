@@ -57,16 +57,40 @@ interface PurchaseResponse {
 }
 ```
 
-<Callout title="checkoutUrl is not always present" type="warn">
-ABA's current API mainly answers with a KHQR code (`qrString` and
-`qrImage`), not a web checkout link. Don't assume `checkoutUrl` will be
-set — check for it before using it, and prefer showing the QR code
-instead. See [KHQR Generation](/docs/khqr) for how to display it.
+## Hosted Card Payments (`paymentGate`)
+
+Setting `paymentOption: "cards"` alone **is ignored** on a merchant profile that has the QR Payment API service enabled — ABA answers with KHQR JSON regardless.
+
+To reach ABA's hosted card checkout page, you must also pass **`paymentGate: 0`**:
+
+```typescript
+const purchase = await aba.createPurchase({
+  transactionId: generateTransactionId(),
+  amount: 10.0,
+  currency: "USD",
+  items: "Order Payment",
+  paymentOption: "cards",
+  paymentGate: 0,          // REQUIRED: routes to Checkout service instead of QR API
+  viewType: "hosted_view", // "hosted_view" | "popup"
+  returnUrl: "https://myshop.com/orders/success",
+  cancelUrl: "https://myshop.com/orders/cancel",
+});
+
+if (purchase.success && purchase.checkoutUrl) {
+  // Redirect customer to ABA hosted card payment page
+  window.location.href = purchase.checkoutUrl;
+}
+```
+
+<Callout title="Critical: paymentGate & viewType Hashing Rules" type="warn">
+Both <code>paymentGate</code> and <code>viewType</code> are <strong>body-only fields and NOT part of the request hash</strong>. Adding them to the hash produces <code>Wrong Hash.</code> on every call. The SDK handles this separation automatically.
 </Callout>
 
-`qrImage` is a PNG that ABA renders for you — you can put it straight in an
-`<img src>` with no extra work. Use [`generateKHQR`](/docs/khqr) only if you
-want a styled card instead of ABA's plain QR image.
+### Key Details for Card Checkout
+
+- **`checkoutUrl` is returned ONLY for this flow**: ABA responds with HTTP 302 redirecting to the payment page. The SDK captures this location header and returns it as `purchase.checkoutUrl`. The v3 QR API does not return a checkout URL.
+- **Do not assert on the URL path**: `viewType: "hosted_view"` is served from the root (`/`), while other view types use `/checkout/`. Both are valid ABA endpoints.
+- **Page token timeout**: The hosted checkout page's token expires **180 seconds** after creation. Customers should be redirected immediately.
 
 ---
 

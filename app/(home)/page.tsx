@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { InstallSnippet } from '@/components/install-snippet';
+import { AgentPromptSnippet } from '@/components/agent-prompt-snippet';
 import { InteractivePreview } from '@/components/interactive-preview';
 
 function TelegramIcon() {
@@ -86,6 +87,9 @@ export default function HomePage() {
               <span>Sandbox Portal ↗</span>
             </a>
           </div>
+
+          {/* AI Agent Setup Snippet */}
+          <AgentPromptSnippet />
 
           {/* Quick Install Snippet */}
           <InstallSnippet />

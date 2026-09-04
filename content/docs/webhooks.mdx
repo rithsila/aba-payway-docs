@@ -3,75 +3,65 @@ title: Webhooks
 description: Receiving instant payment notifications and signature verification
 ---
 
-<Callout title="Not finished yet" type="warn">
-`verifyWebhook()` does not correctly check ABA's real signature. Do not rely
-on it to reject fake payment notifications until this is fixed. Read
-"How ABA signs a callback" below before using this in production.
-</Callout>
+When a customer pays, ABA PayWay posts a JSON callback (pushback) to your webhook URL with signature header `X-PayWay-HMAC-SHA512`.
 
-When a customer pays, ABA PayWay can send a notification to a `callback_url`
-you provide. ABA signs it with an `X-PayWay-HMAC-SHA512` header so you can
-check the message really came from ABA and wasn't changed along the way.
-
-## How ABA signs a callback
-
-Based on ABA's own sample code, the signature is built like this:
-
-1. Take all the fields in the callback body.
-2. Sort them by field name, A to Z.
-3. Join the values together into one string (no separators).
-4. HMAC-SHA512 that string, then Base64-encode it.
-5. Compare it to the `X-PayWay-HMAC-SHA512` header.
-
-**What key signs it is not confirmed.** ABA's sample just calls it
-`YOUR_SECRET_KEY` without saying which credential that is. It is most likely
-your **Public Key** (the same one used as `apiKey`), since that's the only
-shared secret ABA gives you — but treat this as a guess until ABA confirms it
-in writing.
-
-## What `verifyWebhook()` actually does today
+Use `verifyWebhook()` to validate the notification:
 
 ```typescript
-async verifyWebhook(payload: string, signature: string, secret: string): Promise<boolean>
+verifyWebhook(
+  payload: string | Record<string, unknown>,
+  signature: string,
+  secret?: string
+): Promise<boolean>
 ```
 
-It HMAC-SHA512s the **raw request body as one string** — not the sorted,
-concatenated fields described above. So it will not produce the same
-signature ABA sends, and will reject every real ABA callback.
+---
 
-The comparison itself is done safely (constant-time, so a timing attack can't
-guess the right answer one byte at a time) — the problem is only in what
-gets hashed, not how it's compared.
+## How `verifyWebhook()` Works
 
-**Until this is fixed:** don't gate anything important on `verifyWebhook()`.
-If you need to react to a payment right now, use [`checkStatus()`](/docs/check-status)
-to ask ABA directly instead of trusting an unverified webhook body.
+The method implements ABA's exact pushback verification algorithm:
 
-## There is no "webhook secret" from ABA
+1. **Sorts JSON keys ascending**: Orders the body keys alphabetically (`ksort`).
+2. **Concatenates values only**: Joins values together with no keys and no separators.
+3. **Calculates HMAC-SHA512**: Hashes the concatenated string using the secret key.
+4. **Encodes to Base64**: Matches ABA's signature format.
+5. **Constant-time comparison**: Compares bytes with an XOR accumulator (`^`) to protect against timing attacks.
 
-You may see `ABA_WEBHOOK_SECRET` in older examples. ABA does not issue a
-webhook secret — it isn't on the credential sheet, and there's no dashboard
-page that generates one. Don't spend time looking for it.
+### Three Important Properties
 
-## Example (once verification is fixed)
+1. **Raw body is not required**: ABA builds the signature from parsed values, not raw request bytes. A framework-parsed body (`await req.json()`) works identically to a string, and incoming key order does not matter.
+2. **Secret is optional**: The method falls back automatically: `secret` → `config.webhookSecret` → `config.apiKey`. You do not need to pass it explicitly if you already configured your client.
+3. **Never throws**: Bad signatures, malformed bodies, or missing headers return `false` instead of throwing an error.
+
+---
+
+## Code Example
 
 ```typescript
 import { ABAPayWay } from "aba-payway-sdk-unofficial";
 
+const aba = new ABAPayWay({
+  merchantId: process.env.ABA_MERCHANT_ID!,
+  apiKey: process.env.ABA_API_KEY!,
+  baseUrl: process.env.ABA_BASE_URL || "https://checkout.payway.com.kh",
+});
+
 export async function POST(req: Request) {
-  const rawBody = await req.text();
-  const signature = req.headers.get("x-payway-hmac-sha512") || "";
+  const body = await req.json();
+  const signature = req.headers.get("x-payway-hmac-sha512") ?? "";
 
-  // Using your Public Key here is a best guess — see "How ABA signs a
-  // callback" above. Confirm with ABA before relying on this in production.
-  const isValid = await aba.verifyWebhook(rawBody, signature, process.env.ABA_API_KEY!);
-
+  // 1. Verify signature without needing raw text
+  const isValid = await aba.verifyWebhook(body, signature);
   if (!isValid) {
     return new Response("Invalid signature", { status: 401 });
   }
 
-  const payload = JSON.parse(rawBody);
-  console.log("Verified Transaction:", payload.tran_id, payload.status);
+  // 2. Always confirm with checkStatus() — do not trust payload.status alone
+  const payment = await aba.checkStatus(body.tran_id);
+  if (payment.status === "APPROVED") {
+    // 3. Settle the order. Handler MUST be idempotent!
+    // ABA may deliver the same pushback more than once.
+  }
 
   return new Response("OK", { status: 200 });
 }
@@ -79,10 +69,24 @@ export async function POST(req: Request) {
 
 ---
 
+<Callout title="Which key signs the pushback?" type="warn">
+ABA's sample code says only <code>YOUR_SECRET_KEY</code>. The SDK defaults to using your <code>apiKey</code> because that is the only shared secret ABA issues to merchants. This detail has not been confirmed by ABA in writing.
+</Callout>
+
+<Callout title="Testing limitation & Domain Whitelisting" type="info">
+The pushback signature scheme is implemented and unit-tested against an independent implementation. However, it has not been verified against a live ABA callback in production, which requires a publicly reachable <code>return_url</code> whitelisted by ABA. Note that ABA rejects non-whitelisted callback domains with error <strong>code 81</strong>.
+</Callout>
+
+---
+
+## Best Practices
+
+- **Make handlers idempotent**: Pushback notifications can arrive more than once for the same transaction. Ensure your system does not duplicate order fulfillments or credits.
+- **Always verify with `checkStatus()`**: Treat webhook pushbacks as a fast notification signal, but verify final state against the check-transaction API before releasing goods or services.
+
+---
+
 ## Official ABA Documentation Reference
 
 - **ABA Pushback Notification (Webhooks)**: [https://developer.payway.com.kh/ecommerce-checkout-3158159f0](https://developer.payway.com.kh/ecommerce-checkout-3158159f0)
 - **ABA Security & HMAC-SHA512 Verification**: [https://developer.payway.com.kh/api-endpoints-984508m0](https://developer.payway.com.kh/api-endpoints-984508m0)
-
-Neither page documents the pushback signature in detail as of this writing —
-the steps above come from a third-party sample, not an official spec page.

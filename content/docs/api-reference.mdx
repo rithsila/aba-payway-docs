@@ -11,7 +11,7 @@ Main SDK client class.
 - `constructor(config: ABAConfig)`
 - `createPurchase(request: PurchaseRequest): Promise<PurchaseResponse>`
 - `checkStatus(transactionId: string): Promise<StatusResponse>`
-- `verifyWebhook(payload: string, signature: string, secret: string): Promise<boolean>`
+- `verifyWebhook(payload: string | Record<string, unknown>, signature: string, secret?: string): Promise<boolean>`
 
 ---
 

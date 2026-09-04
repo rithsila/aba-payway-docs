@@ -3,17 +3,77 @@ title: Sandbox Testing
 description: End-to-end integration testing against ABA sandbox
 ---
 
-This SDK includes full integration tests against the live ABA PayWay Sandbox.
+Testing against the live ABA PayWay Sandbox requires understanding how the sandbox environment behaves differently from production.
+
+<Callout title="Important Sandbox Limitation: KHQR" type="warn">
+<strong>Sandbox KHQR cannot be scanned by the real ABA Mobile app.</strong>
+
+Transactions created with <code>abapay_khqr</code> stay <code>PENDING</code> forever because real banking apps cannot process test Bakong QR strings. <strong>Hosted card checkout is the only sandbox flow a human can actually complete.</strong>
+</Callout>
+
+---
+
+## ABA Test Cards
+
+You cannot use real credit cards in the sandbox. Use these test cards:
+
+| Card Status | Card Type | Card Number | Exp | CVV | 3DS Enrolled | Note |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Success** | Mastercard | `5156 8399 3770 6777` | 01/30 | 993 | No | **Recommended first test** — no OTP required. |
+| **Success** | Visa | `4286 0900 0000 0206` | 04/30 | 777 | Yes | Sends OTP to registered ABA account email. |
+| **Declined** | Mastercard | `5156 8302 7256 1029` | 04/30 | 777 | Yes | Declined with OTP step. |
+| **Declined** | Visa | `4156 8399 3770 6777` | 01/30 | 993 | No | Declined without OTP. |
+
+<Callout title="180-Second Hosted Page Timeout" type="info">
+The hosted checkout page's token expires <strong>180 seconds</strong> after creation. Complete test card entry promptly once the page opens.
+</Callout>
+
+---
+
+## SDK Testing CLI Tools
+
+The SDK includes dedicated scripts to verify sandbox behavior:
+
+```bash
+# 1. Drive one payment end-to-end (creates purchase, opens browser, polls to APPROVED)
+npm run pay:sandbox
+
+# 2. Generate a dated evidence report to submit to ABA when requesting production access
+npm run report:sandbox
+
+# 3. Verify credentials before testing
+npm run verify:credentials
+
+# 4. View raw KHQR code image
+npm run see:qr
+```
+
+---
 
 ## Setup Environment File
 
-Create a `.env` file in the root repository directory with the values from
-your ABA credential sheet:
+Create a `.env` file in the root repository directory:
 
 ```bash
 ABA_MERCHANT_ID=your_sandbox_merchant_id
-ABA_API_KEY=your_sandbox_public_key
+ABA_API_KEY=your_sandbox_api_key
 ABA_BASE_URL=https://checkout-sandbox.payway.com.kh
+```
+
+---
+
+## Running Test Suites
+
+Run the mocked unit test suite:
+
+```bash
+npm test
+```
+
+Run live sandbox integration tests:
+
+```bash
+npm run test:sandbox
 ```
 
 ---
@@ -23,39 +83,6 @@ ABA_BASE_URL=https://checkout-sandbox.payway.com.kh
 - **Official Free Sandbox Signup**: [https://sandbox.payway.com.kh/register-sandbox/](https://sandbox.payway.com.kh/register-sandbox/)
 - **ABA Developer Overview Guide**: [https://developer.payway.com.kh/overview-865678m0](https://developer.payway.com.kh/overview-865678m0)
 - **ABA Test Cards & Testing Guide**: [https://developer.payway.com.kh/resources-3305682f0](https://developer.payway.com.kh/resources-3305682f0)
+- **ABA Test Cards Guide (`docs/ABA Test Cards.md`)**: [ABA Test Cards Guide](https://github.com/rithsila/aba-payway-unofficial/blob/main/docs/ABA%20Test%20Cards.md)
 
----
-
-## Running Tests
-
-Just filled in `.env`? Check it works first, before running anything else:
-
-```bash
-npm run verify:credentials
-```
-
-This makes one real $1.00 sandbox purchase and one status check, then tells
-you plainly whether your credentials are good — and if not, which value is
-wrong (mismatched merchant/key pair, or an expired key).
-
-Run the mocked unit test suite (no network calls, checks the code's logic):
-
-```bash
-npm test
-```
-
-Run live sandbox integration tests (real calls to ABA's sandbox):
-
-```bash
-npm run test:sandbox
-```
-
-Want to actually **see** a real QR code, not just terminal output? Run:
-
-```bash
-npm run see:qr
-```
-
-This saves ABA's QR code as `qr-code.png` in the project folder, which you
-can open and look at.
 
