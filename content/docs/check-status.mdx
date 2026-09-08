@@ -37,6 +37,7 @@ When a card is refused, ABA displays error 57 with a "Try Again" button on the h
 | :--- | :--- | :--- |
 | `APPROVED` | Payment completed and settled. | Settle order and deliver goods. |
 | `PENDING` | Awaiting payment or open for retry. | Keep waiting / polling. Card refusals stay here. |
+| `CANCELLED` | Cancelled via `closeTransaction()`. | Transaction closed. Incoming payments rejected. |
 | `DECLINED` | Terminal decline from bank. | Do not rely on this for card refusal. |
 | `REFUNDED` | Transaction refunded. | Update order state. |
 | `ERROR` | API query failed. | Check `errorCode` and retry. |

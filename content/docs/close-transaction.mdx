@@ -1,0 +1,80 @@
+---
+title: Close Transaction
+description: Cancel unpaid transactions before payment completion
+---
+
+If your business handles transactions that may require cancellation — such as flash sales, hotel reservations, seat bookings, or checkout session timeouts — you can use `closeTransaction()` to cancel an unpaid transaction before payment completes.
+
+Once a transaction is closed:
+- It **no longer accepts payment**: any incoming payment will be rejected or reversed by ABA.
+- No payment notification (callback/webhook) will be sent to the merchant.
+- Polling `checkStatus()` will report status as `CANCELLED`.
+
+---
+
+## Basic Usage
+
+Call `closeTransaction()` with the original `transactionId`:
+
+```typescript
+import { aba } from "@/lib/payway";
+
+const response = await aba.closeTransaction("TXN_1740001");
+
+if (response.success) {
+  console.log("Transaction closed:", response.transactionId);
+  console.log("ABA Status Code:", response.code); // "00"
+  console.log("Message:", response.message);      // "Success!"
+} else {
+  console.error(`Close failed (code ${response.code}):`, response.error);
+}
+```
+
+---
+
+## Response Structure
+
+The method returns a `CloseTransactionResponse` object:
+
+```typescript
+export interface CloseTransactionResponse {
+  readonly success: boolean;
+  readonly transactionId: string;
+  readonly code?: string;      // ABA response status code (e.g. "00", "5", "1")
+  readonly message?: string;   // ABA message (e.g. "Success!", "Transaction not found")
+  readonly error?: string;     // Error message if request failed
+}
+```
+
+---
+
+## Response Codes
+
+ABA Close Transaction endpoint (`/api/payment-gateway/v1/payments/close-transaction`) returns these status codes:
+
+| Code | Meaning | Description |
+| :--- | :--- | :--- |
+| `00` | Success | Transaction successfully cancelled and closed. |
+| `1` | Wrong Hash | Merchant ID, API key, or parameter signature mismatch. |
+| `5` | Transaction not found | Transaction ID does not exist or was already closed. |
+| `26` | Invalid merchant profile | Merchant profile cannot perform close transaction. |
+
+---
+
+## Under the Hood
+
+The SDK handles all required authentication parameters automatically:
+
+1. **Endpoint**: `POST ${baseUrl}/api/payment-gateway/v1/payments/close-transaction`
+2. **Headers**: `Content-Type: application/json`
+3. **Payload**:
+   - `req_time`: Current UTC timestamp formatted as `YYYYMMDDHHmmss`.
+   - `merchant_id`: Your configured Merchant ID.
+   - `tran_id`: The transaction ID to cancel.
+   - `hash`: Base64 HMAC-SHA512 of `req_time + merchant_id + tran_id` signed with your API key.
+
+---
+
+## Official ABA Documentation Reference
+
+- **ABA Close Transaction Endpoint**: [https://developer.payway.com.kh/close-transaction-14530822e0](https://developer.payway.com.kh/close-transaction-14530822e0)

@@ -6,6 +6,7 @@
     "create-purchase",
     "deeplink",
     "check-status",
+    "close-transaction",
     "webhooks",
     "khqr",
     "testing",
