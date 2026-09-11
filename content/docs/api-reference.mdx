@@ -12,6 +12,7 @@ Main SDK client class.
 - `createPurchase(request: PurchaseRequest): Promise<PurchaseResponse>`
 - `checkStatus(transactionId: string): Promise<StatusResponse>`
 - `closeTransaction(transactionId: string): Promise<CloseTransactionResponse>`
+- `refund(request: RefundRequest): Promise<RefundResponse>`
 - `verifyWebhook(payload: string | Record<string, unknown>, signature: string, secret?: string): Promise<boolean>`
 
 ---
@@ -92,6 +93,8 @@ import type {
   PurchaseResponse,
   StatusResponse,
   CloseTransactionResponse,
+  RefundRequest,
+  RefundResponse,
   PaymentStatus,
   KHQROptions,
   HashParams,
@@ -100,7 +103,7 @@ import type {
 
 | Type | Description |
 | :--- | :--- |
-| `ABAConfig` | Client configuration — `merchantId`, `apiKey`, `baseUrl`, `webhookSecret`. |
+| `ABAConfig` | Client configuration — `merchantId`, `apiKey`, `baseUrl`, `webhookSecret`, `rsaPublicKey`. |
 | `PurchaseItem` | A single line item — `name`, `quantity`, `price`. |
 | `PaymentOption` | `"cards"`, `"abapay_khqr"`, `"abapay_khqr_deeplink"`, `"alipay"`, `"wechat"`, `"google_pay"`. Any string is still accepted. |
 | `ReturnDeeplink` | `{ ios_scheme?, android_scheme? }` — where ABA Mobile returns the customer. |
@@ -108,6 +111,8 @@ import type {
 | `PurchaseResponse` | Result of `createPurchase()`. |
 | `StatusResponse` | Result of `checkStatus()`. |
 | `CloseTransactionResponse` | Result of `closeTransaction()`. |
+| `RefundRequest` | Input for `refund()` — `transactionId`, `refundAmount`, optional `rsaPublicKey`. |
+| `RefundResponse` | Result of `refund()` — `success`, `transactionStatus`, `totalRefunded`, `grandTotal`, `code`, `message`. |
 | `PaymentStatus` | `"PENDING"`, `"APPROVED"`, `"DECLINED"`, `"REFUNDED"`, `"CANCELLED"`, `"ERROR"`. |
 | `KHQROptions` | Input for `generateKHQR()`. |
 | `HashParams` | Raw parameters for `generateABAHash()`. |

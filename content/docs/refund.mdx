@@ -1,0 +1,138 @@
+---
+title: Refund API
+description: Issue full or partial refunds for completed transactions
+---
+
+You can use the Refund API to issue full or partial refunds for transactions within 30 days after they were created.
+
+KHQR and ABA PAY refunds are processed immediately. Card, WeChat Pay, and Alipay refunds follow your agreement with ABA PayWay.
+
+<Callout title="New: KHQR Refund Support" type="info">
+ABA PayWay now supports KHQR transaction refunds via API, ABA Merchant Portal, ABA Merchant App, and ABA Merchant Lite.
+</Callout>
+
+---
+
+## Refund Rules
+
+- **Eligible Transactions**: Only transactions with a status of `COMPLETED` can be refunded.
+- **Time Frame**: Must be requested within **30 days** of payment creation date.
+- **Full & Partial Refunds**: You can issue multiple partial refunds until the original total amount is reached.
+- **Pending Settlements**: Refunds can be issued even while settlement is pending (Card, WeChat, Alipay).
+- **Rate Limit**: Up to 500 requests per second.
+- **Enablement**: Your outlet/terminal must have the refund feature enabled in ABA Merchant Portal.
+
+---
+
+## Configuration
+
+The Refund API requires an **RSA Public Key** provided by ABA Bank to encrypt authentication payloads:
+
+```typescript
+import { ABAPayWay } from "aba-payway-sdk-unofficial";
+
+export const aba = new ABAPayWay({
+  merchantId: process.env.ABA_PAYWAY_MERCHANT_ID!,
+  apiKey: process.env.ABA_PAYWAY_API_KEY!,
+  baseUrl: process.env.ABA_PAYWAY_API_URL!,
+  rsaPublicKey: process.env.ABA_PAYWAY_RSA_PUBLIC_KEY, // Optional in config, can also pass per call
+});
+```
+
+---
+
+## Basic Usage
+
+### 1. Issue a Full or Partial Refund
+
+```typescript
+import { aba } from "@/lib/payway";
+
+const response = await aba.refund({
+  transactionId: "ORDER_1740001",
+  refundAmount: 5.0, // Refund amount in original currency
+});
+
+if (response.success) {
+  console.log("Refund Success!");
+  console.log("Transaction Status:", response.transactionStatus); // "REFUNDED"
+  console.log("Total Refunded So Far:", response.totalRefunded);
+  console.log("Original Grand Total:", response.grandTotal);
+} else {
+  console.error(`Refund failed (${response.code}):`, response.message);
+}
+```
+
+### 2. Passing RSA Public Key Per Request
+
+If you manage multiple RSA keys or prefer not to configure it globally:
+
+```typescript
+const response = await aba.refund({
+  transactionId: "ORDER_1740001",
+  refundAmount: 10.0,
+  rsaPublicKey: process.env.SPECIFIC_RSA_KEY,
+});
+```
+
+---
+
+## Response Structure
+
+`aba.refund()` returns a `RefundResponse` object:
+
+```typescript
+export interface RefundResponse {
+  readonly success: boolean;
+  readonly transactionId: string;
+  readonly refundAmount: number;
+  readonly grandTotal?: number;        // Original grand total
+  readonly totalRefunded?: number;      // Total refunded amount across all partial refunds
+  readonly currency?: string;          // Original currency (e.g. "USD", "KHR")
+  readonly transactionStatus?: string;  // "REFUNDED"
+  readonly code?: string;              // Status code (e.g. "00")
+  readonly message?: string;           // Status description
+  readonly error?: string;             // Error message if request failed
+}
+```
+
+---
+
+## Status and Error Codes
+
+| Code | Meaning | Description |
+| :--- | :--- | :--- |
+| `00` | Success | Refund processed successfully. |
+| `PTL02` | Invalid hash | Signature mismatch between request data and API key. |
+| `PTL04` | Validation required | Required parameter is missing. |
+| `PTL05` | Invalid format | Parameter format does not match specification. |
+| `PTL06` | Invalid request time | `request_time` is missing or incorrectly formatted. |
+| `PTL37` | Amount exceeded | Refund amount cannot exceed original purchase amount. |
+| `PTL57` | Unable to refund | Terminal or profile cannot process refund. |
+| `PTL58` | Fail to refund | Gateway failed to execute refund. |
+| `PTL62` | Invalid merchant | Merchant information is invalid. |
+| `PTL63` | Missing security config | Merchant has no security config profile. |
+| `PTL168` | Concurrency limit | Concurrent request limit reached; retry in a few seconds. |
+| `PTL169` | Account closed | Settlement account is closed. |
+| `PTL181` | Insufficient balance | Available balance is not enough to cover the refund. |
+| `PTL186` | Invalid amount format | Amount decimal formatting is invalid. |
+| `PTL187` | Below minimum | Refund amount is below minimum allowed value. |
+
+---
+
+## Under the Hood
+
+The SDK handles ABA's chunked RSA encryption and HMAC signature automatically:
+
+1. **Endpoint**: `POST ${baseUrl}/api/merchant-portal/merchant-access/online-transaction/refund`
+2. **Payload**:
+   - `request_time`: UTC timestamp (`YYYYMMDDHHmmss`).
+   - `merchant_id`: Your ABA Merchant ID.
+   - `merchant_auth`: JSON payload `{ mc_id, tran_id, refund_amount }` encrypted with your RSA Public Key in 117-byte chunks (PKCS#1 v1.5) and Base64-encoded.
+   - `hash`: Base64 HMAC-SHA512 of `request_time + merchant_id + merchant_auth` signed with your API key.
+
+---
+
+## Official ABA Documentation Reference
+
+- **ABA PayWay Refund API**: [https://developer.payway.com.kh/refund-api-14530821e0](https://developer.payway.com.kh/refund-api-14530821e0)
