@@ -1,0 +1,97 @@
+---
+title: Transaction List
+description: Retrieve filtered, paginated transaction history for accounting and reporting
+---
+
+The Transaction List API allows merchants to query recent transactions across their online and in-store profiles.
+
+It supports filtering by date range, amounts, payment statuses, and pagination.
+
+<Callout title="Date Range Rule" type="info">
+ABA allows filtering from any date in the past up to the current day, with a maximum window of **3 days** per request.
+</Callout>
+
+---
+
+## Basic Usage
+
+```typescript
+import { aba } from "@/lib/payway";
+
+const response = await aba.listTransactions({
+  fromDate: "2026-09-10 00:00:00",
+  toDate: "2026-09-11 23:59:59",
+  status: "APPROVED,REFUNDED",
+  page: 1,
+  pagination: 50, // Max 1000
+});
+
+if (response.success) {
+  console.log(`Retrieved ${response.transactions.length} records:`);
+  response.transactions.forEach((tx) => {
+    console.log(`- ${tx.transactionId} (${tx.paymentStatus}): $${tx.totalAmount} via ${tx.paymentType}`);
+  });
+} else {
+  console.error("Failed to list transactions:", response.error);
+}
+```
+
+---
+
+## Filter Options (`TransactionListFilter`)
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `fromDate` | `string` | Today 00:00:00 | Start timestamp in `YYYY-MM-DD HH:mm:ss` format. |
+| `toDate` | `string` | Today 23:59:59 | End timestamp in `YYYY-MM-DD HH:mm:ss` format (max 3-day window). |
+| `fromAmount` | `number` | `undefined` | Filter transactions with amount greater than or equal to this value. |
+| `toAmount` | `number` | `undefined` | Filter transactions with amount less than or equal to this value. |
+| `status` | `string` | `undefined` | Filter by status: `APPROVED`, `REFUNDED`, `PENDING`, `DECLINED`, `CANCELLED` (comma-separated for multiples). |
+| `page` | `number \| string` | `"1"` | Current page index. |
+| `pagination` | `number \| string` | `"40"` | Records per page (maximum: `1000`). |
+
+---
+
+## Response Structure
+
+```typescript
+export interface TransactionListItem {
+  readonly transactionId: string;
+  readonly transactionDate: string;
+  readonly apv?: string;
+  readonly paymentStatus: PaymentStatus;
+  readonly paymentStatusCode?: number;
+  readonly originalAmount?: number;
+  readonly originalCurrency?: string;
+  readonly totalAmount?: number;
+  readonly discountAmount?: number;
+  readonly refundAmount?: number;
+  readonly paymentAmount?: number;
+  readonly paymentCurrency?: string;
+  readonly firstName?: string;
+  readonly lastName?: string;
+  readonly email?: string;
+  readonly phone?: string;
+  readonly bankRef?: string;
+  readonly payerAccount?: string;
+  readonly bankName?: string;
+  readonly cardSource?: string;
+  readonly paymentType?: string;
+}
+
+export interface TransactionListResponse {
+  readonly success: boolean;
+  readonly transactions: readonly TransactionListItem[];
+  readonly page?: string;
+  readonly pagination?: string;
+  readonly code?: string;
+  readonly message?: string;
+  readonly error?: string;
+}
+```
+
+---
+
+## Official Reference
+
+- **ABA Transaction List Endpoint**: [https://developer.payway.com.kh/get-transaction-list-14530825e0](https://developer.payway.com.kh/get-transaction-list-14530825e0)

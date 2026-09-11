@@ -1,0 +1,88 @@
+---
+title: Transaction Details
+description: Retrieve full history and operation logs for past transactions
+---
+
+While `checkStatus()` only works for transactions created **within 7 days**, `getTransactionDetail()` allows you to look up any past transaction without time restrictions.
+
+It also returns deep transaction records:
+- Masked payer account number or card PAN.
+- Bank name (e.g. `ABA Bank`, or issuer bank for KHQR).
+- Card routing source (`ONUS`, `OFFUS_DOMESTIC`, `OFFUS_INTERNATIONAL`).
+- Complete lifecycle operations list (`Completed`, `Pre-Auth`, `Refunded`).
+
+<Callout title="Rate Limit Note" type="warning">
+ABA limits this endpoint to **10 requests per minute**. Do not use it for real-time polling while a customer is actively paying — use `checkStatus()` for real-time checks.
+</Callout>
+
+---
+
+## Basic Usage
+
+```typescript
+import { aba } from "@/lib/payway";
+
+const response = await aba.getTransactionDetail("ORDER_1740001");
+
+if (response.success) {
+  console.log("Status:", response.status); // "APPROVED"
+  console.log("Total Paid:", response.paymentAmount, response.paymentCurrency);
+  console.log("Payer Bank:", response.bankName);
+  console.log("Masked Account:", response.payerAccount);
+
+  // View operation history
+  response.operations?.forEach((op) => {
+    console.log(`- ${op.status}: $${op.amount} at ${op.transactionDate}`);
+  });
+} else {
+  console.error("Error retrieving details:", response.error);
+}
+```
+
+---
+
+## Response Structure
+
+```typescript
+export interface TransactionOperation {
+  readonly status: string;            // "Completed", "Refunded", "Pre-Auth", etc.
+  readonly amount: number;
+  readonly transactionDate: string;
+  readonly bankRef?: string;
+}
+
+export interface TransactionDetailResponse {
+  readonly success: boolean;
+  readonly transactionId: string;
+  readonly status: PaymentStatus;
+  readonly statusCode?: number;
+  readonly originalAmount?: number;
+  readonly originalCurrency?: string;
+  readonly paymentAmount?: number;
+  readonly paymentCurrency?: string;
+  readonly totalAmount?: number;
+  readonly refundAmount?: number;
+  readonly discountAmount?: number;
+  readonly apv?: string;
+  readonly transactionDate?: string;
+  readonly firstName?: string;
+  readonly lastName?: string;
+  readonly email?: string;
+  readonly phone?: string;
+  readonly bankRef?: string;
+  readonly paymentType?: string;      // "ABA Pay", "KHQR", "VISA", "MC", etc.
+  readonly payerAccount?: string;     // Masked account number
+  readonly bankName?: string;         // Issuing bank name
+  readonly cardSource?: string;       // "ONUS", "OFFUS_DOMESTIC", "OFFUS_INTERNATIONAL"
+  readonly operations?: readonly TransactionOperation[];
+  readonly code?: string;
+  readonly message?: string;
+  readonly error?: string;
+}
+```
+
+---
+
+## Official Reference
+
+- **ABA Transaction Detail Endpoint**: [https://developer.payway.com.kh/get-a-transaction-details-14530824e0](https://developer.payway.com.kh/get-a-transaction-details-14530824e0)

@@ -11,8 +11,11 @@ Main SDK client class.
 - `constructor(config: ABAConfig)`
 - `createPurchase(request: PurchaseRequest): Promise<PurchaseResponse>`
 - `checkStatus(transactionId: string): Promise<StatusResponse>`
+- `getTransactionDetail(transactionId: string): Promise<TransactionDetailResponse>`
+- `listTransactions(filter?: TransactionListFilter): Promise<TransactionListResponse>`
 - `closeTransaction(transactionId: string): Promise<CloseTransactionResponse>`
 - `refund(request: RefundRequest): Promise<RefundResponse>`
+- `getExchangeRates(): Promise<ExchangeRatesResponse>`
 - `verifyWebhook(payload: string | Record<string, unknown>, signature: string, secret?: string): Promise<boolean>`
 
 ---
@@ -95,6 +98,13 @@ import type {
   CloseTransactionResponse,
   RefundRequest,
   RefundResponse,
+  CurrencyRate,
+  ExchangeRatesResponse,
+  TransactionOperation,
+  TransactionDetailResponse,
+  TransactionListFilter,
+  TransactionListItem,
+  TransactionListResponse,
   PaymentStatus,
   KHQROptions,
   HashParams,
@@ -113,6 +123,13 @@ import type {
 | `CloseTransactionResponse` | Result of `closeTransaction()`. |
 | `RefundRequest` | Input for `refund()` — `transactionId`, `refundAmount`, optional `rsaPublicKey`. |
 | `RefundResponse` | Result of `refund()` — `success`, `transactionStatus`, `totalRefunded`, `grandTotal`, `code`, `message`. |
+| `CurrencyRate` | Exchange rate entry with `buy` and `sell` strings. |
+| `ExchangeRatesResponse` | Result of `getExchangeRates()` — normalized `rates` dictionary by currency code. |
+| `TransactionOperation` | Entry in transaction history — `status`, `amount`, `transactionDate`, `bankRef`. |
+| `TransactionDetailResponse` | Result of `getTransactionDetail()` — full past payment record, masked account, bank name, lifecycle operations. |
+| `TransactionListFilter` | Query filters for `listTransactions()` — `fromDate`, `toDate`, `fromAmount`, `toAmount`, `status`, `page`, `pagination`. |
+| `TransactionListItem` | Single transaction summary item in `listTransactions()`. |
+| `TransactionListResponse` | Result of `listTransactions()` — `transactions`, `page`, `pagination`. |
 | `PaymentStatus` | `"PENDING"`, `"APPROVED"`, `"DECLINED"`, `"REFUNDED"`, `"CANCELLED"`, `"ERROR"`. |
 | `KHQROptions` | Input for `generateKHQR()`. |
 | `HashParams` | Raw parameters for `generateABAHash()`. |

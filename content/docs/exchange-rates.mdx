@@ -1,0 +1,76 @@
+---
+title: Exchange Rates
+description: Fetch live daily foreign exchange rates from ABA Bank
+---
+
+The Exchange Rate API allows you to fetch real-time official foreign currency exchange rates directly from ABA Bank.
+
+The exchange rates match the official prices on the [ABA Forex Exchange](https://www.ababank.com/en/forex-exchange) portal.
+
+<Callout title="Why use this API?" type="info">
+Useful for e-commerce platforms that price goods in USD or Khmer Riel (KHR) and need accurate live bank rates for foreign customers or currency conversions.
+</Callout>
+
+---
+
+## Basic Usage
+
+Call `getExchangeRates()` on your `ABAPayWay` client instance:
+
+```typescript
+import { aba } from "@/lib/payway";
+
+const response = await aba.getExchangeRates();
+
+if (response.success && response.rates) {
+  console.log("AUD Rate:", response.rates.aud); // { buy: "2600.00", sell: "2700.00" }
+  console.log("THB Rate:", response.rates.thb); // { buy: "115.00", sell: "120.00" }
+  console.log("EUR Rate:", response.rates.eur); // { buy: "4200.00", sell: "4350.00" }
+} else {
+  console.error("Failed to fetch exchange rates:", response.error);
+}
+```
+
+---
+
+## Supported Currencies
+
+The API returns buy and sell rates for major currencies:
+
+- **AUD** (Australian Dollar)
+- **SGD** (Singapore Dollar)
+- **EUR** (Euro)
+- **GBP** (British Pound)
+- **THB** (Thai Baht)
+- **VND** (Vietnamese Dong)
+- **CNY** (Chinese Yuan)
+- **JPY** (Japanese Yen)
+- **KRW** (South Korean Won)
+- **MYR** (Malaysian Ringgit)
+- **CAD** (Canadian Dollar)
+- **HKD** (Hong Kong Dollar)
+
+---
+
+## Response Structure
+
+```typescript
+export interface CurrencyRate {
+  readonly buy: string;
+  readonly sell: string;
+}
+
+export interface ExchangeRatesResponse {
+  readonly success: boolean;
+  readonly rates?: Record<string, CurrencyRate>;
+  readonly code?: string;
+  readonly message?: string;
+  readonly error?: string;
+}
+```
+
+---
+
+## Official Reference
+
+- **ABA Exchange Rate Endpoint**: [https://developer.payway.com.kh/exchange-rate-14530823e0](https://developer.payway.com.kh/exchange-rate-14530823e0)
