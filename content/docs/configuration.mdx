@@ -26,7 +26,8 @@ const aba = new ABAPayWay(config);
 | `merchantId` | `string` | Yes | "Merchant Id" on your ABA credential sheet. |
 | `apiKey` | `string` | Yes | "Public Key" on your ABA credential sheet. This is a secret — it's the HMAC-SHA512 key used to sign every request, despite the name. |
 | `baseUrl` | `string` | Yes | "API Url" on your ABA credential sheet. You can paste the full URL ABA gave you, or just the origin — the SDK keeps only the origin either way. |
-| `webhookSecret`| `string` | No | Accepted, but not read by anything yet. See [Webhooks](/docs/webhooks) — it's an unfinished feature, not a working option. |
+| `rsaPublicKey` | `string` | No | "RSA Public Key" on your ABA credential sheet. Used for encrypting authentication payloads in the [Refund API](/docs/refund). |
+| `webhookSecret`| `string` | No | Optional secret for pushback verification (defaults to `apiKey`). |
 
 ---
 
@@ -39,11 +40,10 @@ ABA gives you five items when you register. Here's what each one is for:
 | Merchant Id | `merchantId` | Every request. |
 | Public Key | `apiKey` | Signing every request (HMAC-SHA512). |
 | API Url | `baseUrl` | Which server to call (sandbox or production). |
-| RSA Public Key | *(not used)* | Payout/refund APIs, which ABA turns on per merchant on request. Not used by anything in this SDK. |
-| RSA Private Key | *(not used)* | Same as above. |
+| RSA Public Key | `rsaPublicKey` | Encrypting `merchant_auth` in the [Refund API](/docs/refund). |
+| RSA Private Key | *(not used)* | Reserved by ABA for advanced merchant decryption. |
 
-If you don't see an "RSA Public/Private Key" pair on your sheet, that's
-fine too — you don't need them.
+If you do not use the Refund API, you do not need to configure the RSA key.
 
 ---
 
